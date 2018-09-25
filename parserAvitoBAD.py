@@ -18,13 +18,14 @@ def get_total_pages(html):
     return int(total_pages)
 
 
-def write_csv(data):
-    with open("avito.csv", "a", encoding="utf-8") as csv_file:
+def write_csv(datadata):
+    with open("avito.csv", "w") as csv_file:
         writer = csv.writer(csv_file)
-        writer.writerows((str(data["title"]),
-                          str(data["price"]),
-                          str(data["metro"]),
-                          str(data["url"])))
+        writer.write(('Название', 'Описание', 'Ссылка'))
+        for data in datadata:
+            writer.writerows((str(data["title"]),
+                              str(data["price"]),
+                              str(data["url"])))
 
 def get_page_data(html):
     soup = BeautifulSoup(html, "lxml")
@@ -52,7 +53,7 @@ def main():
         sleep(0.15)
         ad.extend(get_page_data(get_html(BASE_URL + "?p={}&q=lenovo".format(str(i)))))
 
-    print(ad)
+    write_csv(ad)
 
 if __name__ == "__main__":
     main()
