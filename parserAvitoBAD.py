@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
+import sys
+from time import sleep
 
 BASE_URL = "https://www.avito.ru/moskva/noutbuki"
 
@@ -41,11 +43,13 @@ def get_page_data(html):
 
 
 def main():
-    # total_pages = get_total_pages(get_html(url))
-
     ad = []
 
-    for i in range(1, 15):
+    page_num = 15
+    page = 1
+    for i in range(page, page_num):
+        sys.stdout.write("\rПарсинг {} ".format(str((page / page_num) * 100)))
+        sleep(0.15)
         ad.extend(get_page_data(get_html(BASE_URL + "?p={}&q=lenovo".format(str(i)))))
 
     print(ad)
