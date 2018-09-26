@@ -1,30 +1,54 @@
 import requests
-from bs4 import BeautifulSoup
 import csv
+from tqdm import tqdm
+from bs4 import BeautifulSoup
 
-BASE_URL = "https://www.weblancer.net/jobs/"    
+BASE_URL = "https://freelansim.ru/"
+
 
 def get_html(url):
-    res = requests.get(url)
-    return res.text
+    response = requests.get(url)
+    return response.text
 
 
-def parse(html):
+def get_pages(html):
     soup = BeautifulSoup(html, "lxml")
-    all_content = soup.find("div", class_="cols_table")
-    title_ad = all_content.find_all("h2") 
-    print(title_ad)
+    page = soup.find("div", class_="pagination").find_all("a")[-2].get("href")
+    total_page = page.split("=")[1]
+    return int(total_page)
 
 
+def write_csv(dictOfData):
+    with open("weblancer.csv", "w") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(('Название', 'Цена', 'Ссылка'))
+        for data in dictOfData:
+            writer.writerows((data["title"],
+                              data["price"],
+                              data["url"]))
 
 
-
-
-
+def get_data(html):
+    soup = BeautifulSoup(html, "lxml")
+    article = soup.find_all('article', class_='task task_list')
+    dictOfData = []
+    for i in article:
+            # title = i.find("div", class_="task__title").find("a").text.strip()
+            # price = i.find("div", class_="task__price").find("span", class_="count")
+            # url = "https://freelansim.ru" + i.find("div", class_="task__title").find("a").get("href")
+        dictOfData.append({"title": i.div.a.text,
+                          "price": [price.text.strip() for price in i.aside.find_all('span', class_='count')],
+                          "url": BASE_URL + i.div.a["href"]})
+    return dictOfData
 
 
 def main():
-    parse(get_html("https://www.weblancer.net/jobs/"))
+    links = []
+    total_page = get_pages(get_html(BASE_URL))
+    for i in tqdm(range(1, total_page + 1)):
+        links.extend(get_data(get_html(BASE_URL + "tasks?page=1")))
+    write_csv(links)
+
 
 if __name__ == "__main__":
     main()
