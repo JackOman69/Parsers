@@ -23,9 +23,13 @@ def write_csv(dictOfData):
         writer = csv.writer(csv_file)
         writer.writerow(('Название', 'Цена', 'Ссылка'))
         for data in dictOfData:
-            writer.writerows((data["title"],
-                              data["price"],
-                              data["url"]))
+            if data["price"] != []:
+                price = data["price"][0]
+            else:
+                price = "Не указано!"
+            writer.writerow((data["title"],
+                            price,
+                            data["url"]))
 
 
 def get_data(html):
@@ -33,9 +37,6 @@ def get_data(html):
     article = soup.find_all('article', class_='task task_list')
     dictOfData = []
     for i in article:
-            # title = i.find("div", class_="task__title").find("a").text.strip()
-            # price = i.find("div", class_="task__price").find("span", class_="count")
-            # url = "https://freelansim.ru" + i.find("div", class_="task__title").find("a").get("href")
         dictOfData.append({"title": i.div.a.text,
                           "price": [price.text.strip() for price in i.aside.find_all('span', class_='count')],
                           "url": BASE_URL + i.div.a["href"]})
